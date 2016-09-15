@@ -1,0 +1,26 @@
+# docker_host_setup.yml
+---
+- name: prepare docker host for container deployment
+  hosts: docker_hosts
+  sudo: True
+  tasks:
+  - name: install docker
+    apt: name=docker.io update_cache=yes
+
+  - name: add admin user to docker group
+    user: name=admin_user groups=docker append=yes
+
+  - name: add docker config file
+    copy: src=files/docker.conf dest=/etc/default/docker
+
+  - name: restart docker to enable config
+    service: name=docker state=restarted
+
+  - name: install weave
+    command: curl -L git.io/weave -o /usr/local/bin/weave
+
+  - name: make weave executable
+    command: chmod a+x /usr/local/bin/weave
+
+  - name: launch weave
+    command: weave launch 10.0.0.10 --ipalloc-range 10.32.0.0/16
