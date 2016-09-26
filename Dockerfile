@@ -1,6 +1,6 @@
 FROM ubuntu:16.04
 
-MAINTAINER Vincent Meijer "vmeijer@usf.edu"
+MAINTAINER Vincent Meijer "vmeijer@usf.edu" 
 
 # Environment variables
 ENV INSTALL_DIR=/install
