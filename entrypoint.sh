@@ -1,21 +1,21 @@
 #!/bin/bash
 
 set -e 
+set -x
 
 HELP_TEXT="
-Arguments:  
-runserver: Runs Potree in Nginx. Further expected commands: -i or --access_key_id, -k or --secret_access_key.
-convert: Converts provided file into Potree format. Further optional commands: -f or --file: input pointcloud file. -n --name: output Potree page name.
--i or --access_key_id: The AWS Access Key ID of your AWS account  
--k or --secret_access_key: The AWS Secret Access Key of your AWS account  
--h or --help: Display help text
+	Arguments:
+	runserver: Runs Potree in Nginx. Further expected commands: -i or --access_key_id, -k or --secret_access_key.
+	convert: Converts provided file into Potree format. Further optional commands: -f or --file: input pointcloud file. -n --name: output Potree page name.
+	-h or --help: Display help text
+
+	Environment variables required:
+	The AWS Access Key ID of your AWS account
+	The AWS Secret Access Key of your AWS account
 "
 
-AWS_DEFAULT_REGION=us-east-1
-
-
 display_help() {
-	echo ${HELP_TEXT}
+	echo "${HELP_TEXT}"
 }
 
 
@@ -25,7 +25,12 @@ runserver(){
 }
 
 convert_file(){
-	PotreeConverter ${POINTCLOUD_INPUT_FOLDER}/${INPUT_FILE} -o ${POTREE_WWW} -p ${OUTPUT_NAME}
+	if [[ ! -z ${INPUT_FILE} ]] && [[ ! -z ${OUTPUT_NAME} ]]; then
+		PotreeConverter ${POINTCLOUD_INPUT_FOLDER}/${INPUT_FILE} -o ${POTREE_WWW} -p ${OUTPUT_NAME}
+	else
+		echo "Todo: conversion without additional parameters"
+	fi
+	
 }
 
  # Script parameters 
@@ -58,7 +63,11 @@ do
 			shift # next argument
 		;;
 		bash)
-			bash -c "${@:2}"
+			if [[ -z "$2" ]]; then
+				bash
+			else
+				bash -c "${@:2}"
+			fi
 			exit 0
 		;;	
 		-h|--help)
@@ -75,13 +84,19 @@ do
 done
 
 
+# Global variables (parsed through Docker run command)
 if [[ -z ${AWS_ACCESS_KEY_ID} ]]; then
-	echo "Environment variable AWS_ACCESS_KEY_ID not set, exiting..."
+	echo "Environment variable AWS_ACCESS_KEY_ID not specified, exiting..."
 	exit 1
 fi
 
 if [[ -z ${AWS_SECRET_ACCESS_KEY} ]]; then
-	echo "Environment variable AWS_SECRET_ACCESS_KEY not set, exiting..."
+	echo "Environment variable AWS_SECRET_ACCESS_KEY not specified, exiting..."
+	exit 1
+fi
+
+if [[ -z ${AWS_DEFAULT_REGION} ]]; then
+	echo "Environment variable AWS_DEFAULT_REGION not specified, exiting..."
 	exit 1
 fi
 	
