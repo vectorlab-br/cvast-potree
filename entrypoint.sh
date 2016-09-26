@@ -57,14 +57,6 @@ do
 			OUTPUT_NAME="$2"
 			shift # next argument
 		;;
-		-i|--access_key_id)
-			export AWS_ACCESS_KEY_ID="$2"
-			shift # next argument
-		;;
-		-k|--secret_access_key)
-			export AWS_SECRET_ACCESS_KEY="$2"
-			shift # next argument
-		;;
 		bash)
 			bash -c "${@:2}"
 			exit 0
@@ -82,19 +74,20 @@ do
 	shift # next argument or value
 done
 
+
+if [[ -z ${AWS_ACCESS_KEY_ID} ]]; then
+	echo "Environment variable AWS_ACCESS_KEY_ID not set, exiting..."
+	exit 1
+fi
+
+if [[ -z ${AWS_SECRET_ACCESS_KEY} ]]; then
+	echo "Environment variable AWS_SECRET_ACCESS_KEY not set, exiting..."
+	exit 1
+fi
+	
+	
 if [[ ${RUN_SERVER} == True ]]; then
 	runserver
 elif [[ ${CONVERT_FILE} == True ]]; then
-	
-	if [[ -z ${AWS_ACCESS_KEY_ID} ]]; then
-		echo "Environment variable AWS_ACCESS_KEY_ID not set, exiting..."
-		exit 1
-	fi
-	
-	if [[ -z ${AWS_SECRET_ACCESS_KEY} ]]; then
-		echo "Environment variable AWS_SECRET_ACCESS_KEY not set, exiting..."
-		exit 1
-	fi
-	
 	convert_file
 fi
