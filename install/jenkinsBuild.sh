@@ -4,7 +4,7 @@ set -e
 
 ### Global variables and Help
 
-APP_OPTIONS="db|web|elasticsearch|nginx"
+APP_OPTIONS="db|web|elasticsearch|nginx|potree"
 DEFAULT_APPS_DEPLOYED="web|nginx"
 ENVIRONMENT_OPTIONS="test|acc"
 
