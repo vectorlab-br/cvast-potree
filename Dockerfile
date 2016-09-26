@@ -16,15 +16,13 @@ RUN mkdir ${LASTOOLS_ROOT}
 
 WORKDIR ${INSTALL_DIR} 
 
-WORKDIR ${INSTALL_DIR} 
-
 # Install dependencies
 # Install software-properties-common to fix error for add-apt-repository: command not found
 RUN apt-get update -y &&\
+	apt-get install -y software-properties-common &&\
 	add-apt-repository -y ppa:nginx/stable &&\
 	add-apt-repository ppa:george-edison55/cmake-3.x &&\	
 	apt-get update -y &&\
-	apt-get install -y software-properties-common &&\	
 	apt-get install -y nginx &&\
 	chown -R www-data:www-data /var/lib/nginx &&\
 	apt-get install -y python2.7 &&\
@@ -52,23 +50,14 @@ RUN git clone https://github.com/m-schuetz/LAStools.git master &&\
 
 COPY potree_converter ${POTREE_CONVERTER_ROOT}
 
-RUN cd ${POTREE_CONVERTER_ROOT} &&\
-	mkdir build &&\
+WORKDIR ${POTREE_CONVERTER_ROOT}
+RUN mkdir build &&\
 	cd build &&\
 	cmake -DCMAKE_BUILD_TYPE=Release -DLASZIP_INCLUDE_DIRS=${LASTOOLS_ROOT}/master/LASzip/dll -DLASZIP_LIBRARY=${LASTOOLS_ROOT}/master/LASzip/build/src/liblaszip.so .. &&\
 	make &&\
 	cp -R ${POTREE_CONVERTER_ROOT}/PotreeConverter/resources/ ${POTREE_ROOT} &&\
 	cp ${POTREE_CONVERTER_ROOT}/build/PotreeConverter/PotreeConverter /usr/bin
 
-COPY potree_converter ${POTREE_ROOT}/potree_converter
-
-RUN cd ${POTREE_ROOT}/potree_converter &&\
-	mkdir build &&\
-	cd build &&\
-	cmake -DCMAKE_BUILD_TYPE=Release -DLASZIP_INCLUDE_DIRS=${POTREE_ROOT}/lastools/master/LASzip/dll -DLASZIP_LIBRARY=${POTREE_ROOT}/lastools/master/LASzip/build/src/liblaszip.so .. &&\
-	make &&\
-	cp -R ${POTREE_ROOT}/potree_converter/PotreeConverter/resources/ ${POTREE_ROOT} &&\
-	cp ${POTREE_ROOT}/potree_converter/build/PotreeConverter/PotreeConverter /usr/bin
  	
 # Config
 RUN rm /etc/nginx/nginx.conf /etc/nginx/mime.types
