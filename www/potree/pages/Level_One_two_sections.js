@@ -6,8 +6,8 @@ var sceneProperties = {
 	sizeType: "Adaptive",	// other options: "Fixed", "Attenuated"
 	quality: null, 			// other options: "Circles", "Interpolation", "Splats"
 	material: "RGB", 		// other options: "Height", "Intensity", "Classification"
-	pointLimit: 1,				// max number of points in millions
-	pointSize: 1,				// 
+	pointLimit: 4,				// max number of points in millions
+	pointSize: 0.3,				// 
 	navigation: "Orbit",		// other options: "Orbit", "Flight"
 	useEDL: false,				
 };
