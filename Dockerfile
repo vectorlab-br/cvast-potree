@@ -7,7 +7,7 @@ ENV INSTALL_DIR=/install
 ENV POTREE_ROOT=/potree
 ENV POTREE_CONVERTER_ROOT=${POTREE_ROOT}/potree_converter
 ENV LASTOOLS_ROOT=${POTREE_ROOT}/lastools
-ENV POTREE_WWW=/var/www/potree/
+ENV POTREE_WWW=/var/www/potree
 ENV POINTCLOUD_INPUT_FOLDER=/pointcloud_input_folder
 
 RUN mkdir ${POTREE_ROOT}
@@ -55,7 +55,7 @@ RUN mkdir build &&\
 	cd build &&\
 	cmake -DCMAKE_BUILD_TYPE=Release -DLASZIP_INCLUDE_DIRS=${LASTOOLS_ROOT}/master/LASzip/dll -DLASZIP_LIBRARY=${LASTOOLS_ROOT}/master/LASzip/build/src/liblaszip.so .. &&\
 	make &&\
-	cp -R ${POTREE_CONVERTER_ROOT}/PotreeConverter/resources/ ${POTREE_ROOT} &&\
+	cp -R ${POTREE_CONVERTER_ROOT}/PotreeConverter/resources/ ${POTREE_ROOT}/resources &&\
 	cp ${POTREE_CONVERTER_ROOT}/build/PotreeConverter/PotreeConverter /usr/bin
 
  	
@@ -80,6 +80,8 @@ EXPOSE 80 443
 
 # Define mountable directories.
 VOLUME ["/var/log/nginx", "/var/www/potree/resources/pointclouds"]
+
+WORKDIR ${POTREE_ROOT}
 
 # Define default command.
 ENTRYPOINT ["/install/entrypoint.sh"]

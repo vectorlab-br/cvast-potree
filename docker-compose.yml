@@ -3,6 +3,7 @@ services:
     potree:
       restart: always
       image: cvast/cvast-potree:dev
+      working_dir: /potree
       build: 
         context: .
         dockerfile: ./Dockerfile

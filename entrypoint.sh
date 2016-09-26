@@ -3,6 +3,10 @@
 set -e 
 set -x
 
+BUCKET_NAME=test-cvast-potree 
+POINTCLOUD_OUTPUT_FOLDER=${POTREE_WWW}/resources/pointclouds
+POINTCLOUD_INPUT_FOLDER=${POINTCLOUD_INPUT_FOLDER}
+
 HELP_TEXT="
 	Arguments:
 	runserver: Runs Potree in Nginx. Further expected commands: -i or --access_key_id, -k or --secret_access_key.
@@ -19,18 +23,34 @@ display_help() {
 }
 
 
-runserver(){
+runserver() {
  	aws s3 sync s3://test-cvast-potree /var/www/potree/resources/pointclouds
 	exec service nginx start
 }
 
-convert_file(){
+convert_file() {
 	if [[ ! -z ${INPUT_FILE} ]] && [[ ! -z ${OUTPUT_NAME} ]]; then
-		PotreeConverter ${POINTCLOUD_INPUT_FOLDER}/${INPUT_FILE} -o ${POTREE_WWW} -p ${OUTPUT_NAME}
+		PotreeConverter "${POINTCLOUD_INPUT_FOLDER}/${INPUT_FILE}" -o ${POTREE_WWW} -p "${OUTPUT_NAME}" ${OVERWRITE}
 	else
 		echo "Todo: conversion without additional parameters"
 	fi
 	
+	copy_frontend_files
+	upload_pointcloud
+}
+
+copy_frontend_files() {
+	mv ${POTREE_WWW}/examples/${OUTPUT_NAME}.html ${POTREE_WWW}/pages/${OUTPUT_NAME}.html
+	mv ${POTREE_WWW}/examples/${OUTPUT_NAME}.js ${POTREE_WWW}/pages/${OUTPUT_NAME}.js
+}
+
+delete_obsolete_files() {
+	rm -rf ${POTREE_WWW}/examples/css 
+	rm -rf ${POTREE_WWW}/examples/js
+}
+
+upload_pointcloud() {
+	aws s3 sync ${POINTCLOUD_OUTPUT_FOLDER} s3://${BUCKET_NAME} --recursive
 }
 
  # Script parameters 
@@ -40,6 +60,12 @@ convert_file(){
 # Use -gt 0 to consume one or more arguments per pass in the loop (e.g.
 # some arguments don't have a corresponding value to go with it, such as --help ).
 
+# If no arguments are supplied, assume the server needs to be run
+if [[ $#  -eq 0 ]]; then
+	RUN_SERVER=True
+fi
+
+# Else, process arguments
 while [[ $# -gt 0 ]]
 do
 	key="$1"
@@ -62,6 +88,11 @@ do
 			OUTPUT_NAME="$2"
 			shift # next argument
 		;;
+		-o|--overwrite)
+			# Remains empty if not set:
+			OVERWRITE="--overwrite"
+			# No further option/value expected, this is a single command, so no 'shift'
+		;;			
 		bash)
 			if [[ -z "$2" ]]; then
 				bash
