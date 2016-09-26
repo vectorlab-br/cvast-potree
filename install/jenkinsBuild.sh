@@ -32,7 +32,7 @@ build_image() {
 	local APP_NAME=$1
 	echo "Building Docker image:  $APP_NAME:$BUILD_NUMBER"
 	
-	if [[ ${$APP_NAME} == "web" ]] || [[ ${$APP_NAME} == "nginx" ]] || [[ ${$APP_NAME} == "elasticsearch" ]] || [[ ${$APP_NAME} == "db" ]]; then
+	if [[ ${APP_NAME} == "web" ]] || [[ ${APP_NAME} == "nginx" ]] || [[ ${APP_NAME} == "elasticsearch" ]] || [[ ${APP_NAME} == "db" ]]; then
 		DOCKERFILE="Dockerfile-"${APP_NAME}
 	else
 		DOCKERFILE="Dockerfile"
