@@ -31,7 +31,14 @@ AWS_DEFAULT_REGION=us-east-1
 build_image() {
 	local APP_NAME=$1
 	echo "Building Docker image:  $APP_NAME:$BUILD_NUMBER"
-	docker build -f Dockerfile-$APP_NAME -t cvast/cvast-$APP_NAME:$BUILD_NUMBER .
+	
+	if [[ ${$APP_NAME} == "web" ]] || [[ ${$APP_NAME} == "nginx" ]] || [[ ${$APP_NAME} == "elasticsearch" ]] || [[ ${$APP_NAME} == "db" ]]; then
+		DOCKERFILE="Dockerfile-"${APP_NAME}
+	else
+		DOCKERFILE="Dockerfile"
+	fi
+	
+	docker build -f ${DOCKERFILE} -t cvast/cvast-${APP_NAME}:${BUILD_NUMBER} .
 }
 
 
