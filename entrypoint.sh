@@ -9,8 +9,16 @@ POINTCLOUD_INPUT_FOLDER=${POINTCLOUD_INPUT_FOLDER}
 
 HELP_TEXT="
 	Arguments:
-	runserver: Runs Potree in Nginx. Further expected commands: -i or --access_key_id, -k or --secret_access_key.
-	convert: Converts provided file into Potree format. Further optional commands: -f or --file: input pointcloud file. -n --name: output Potree page name.
+	runserver: Runs Potree in Nginx. 
+		Further expected commands: 
+			-i or --access_key_id
+			-k or --secret_access_key
+	convert: Converts provided file into Potree format. 
+		Further optional commands: 
+		-f or --file: input pointcloud file
+		-n or --generate-page: Generates a ready to use web page with the given name.
+		-o or --overwrite: overwrites existing pointcloud with same output name (-n or --name)
+		--aabb arg: Bounding cube as 'minX minY minZ maxX maxY maxZ'. If not provided it is automatically computed
 	-h or --help: Display help text
 
 	Environment variables required:
@@ -30,12 +38,13 @@ runserver() {
 
 convert_file() {
 	if [[ ! -z ${INPUT_FILE} ]] && [[ ! -z ${OUTPUT_NAME} ]]; then
-		PotreeConverter "${POINTCLOUD_INPUT_FOLDER}/${INPUT_FILE}" -o ${POTREE_WWW} -p "${OUTPUT_NAME}" ${OVERWRITE}
+		PotreeConverter "${POINTCLOUD_INPUT_FOLDER}/${INPUT_FILE}" -o ${POTREE_WWW} -p "${OUTPUT_NAME}" ${OVERWRITE} ${BOUNDING_BOX_OPTION} "${BOUNDING_BOX_ARGUMENTS}"
 	else
 		echo "Todo: conversion without additional parameters"
 	fi
 	
 	copy_frontend_files
+	delete_obsolete_files
 	upload_pointcloud
 }
 
@@ -50,7 +59,7 @@ delete_obsolete_files() {
 }
 
 upload_pointcloud() {
-	aws s3 sync ${POINTCLOUD_OUTPUT_FOLDER} s3://${BUCKET_NAME} --recursive
+	aws s3 sync ${POINTCLOUD_OUTPUT_FOLDER} s3://${BUCKET_NAME}
 }
 
  # Script parameters 
@@ -84,7 +93,7 @@ do
 			INPUT_FILE="$2"
 			shift; # next argument
 		;;
-		-n|--name)
+		-p|--generate-page)
 			OUTPUT_NAME="$2"
 			shift # next argument
 		;;
@@ -92,7 +101,12 @@ do
 			# Remains empty if not set:
 			OVERWRITE="--overwrite"
 			# No further option/value expected, this is a single command, so no 'shift'
-		;;			
+		;;
+		--aabb)
+			BOUNDING_BOX_OPTION="--aabb "
+			BOUNDING_BOX_ARGUMENTS="$2"
+			shift # next argument
+		;;
 		bash)
 			if [[ -z "$2" ]]; then
 				bash
