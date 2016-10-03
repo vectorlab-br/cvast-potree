@@ -71,7 +71,7 @@ COPY config/default-ssl /etc/nginx/sites-available/default-ssl
 COPY www /var/www
 
 #Copy entrypoint script (to sync S3 bucket after deployment)
-COPY entrypoint.sh ${INSTALL_DIR}/entrypoint.sh
+COPY /install/entrypoint.sh ${INSTALL_DIR}/entrypoint.sh
 RUN chmod -R 700 ${INSTALL_DIR}
 RUN dos2unix ${INSTALL_DIR}/*
 
