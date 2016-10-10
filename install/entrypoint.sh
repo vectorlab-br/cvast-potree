@@ -3,7 +3,8 @@
 set -e 
 set -x
 
-BUCKET_NAME=test-cvast-potree 
+BUCKET_NAME=test-cvast-potree
+POTREE_WWW=/var/www/potree
 POINTCLOUD_OUTPUT_FOLDER=${POTREE_WWW}/resources/pointclouds
 POINTCLOUD_INPUT_FOLDER=${POINTCLOUD_INPUT_FOLDER}
 

@@ -7,7 +7,6 @@ ENV INSTALL_DIR=/install
 ENV POTREE_ROOT=/potree
 ENV POTREE_CONVERTER_ROOT=${POTREE_ROOT}/potree_converter
 ENV LASTOOLS_ROOT=${POTREE_ROOT}/lastools
-ENV POTREE_WWW=/var/www/potree
 ENV POINTCLOUD_INPUT_FOLDER=/pointcloud_input_folder
 
 RUN mkdir ${POTREE_ROOT}
