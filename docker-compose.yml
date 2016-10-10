@@ -1,7 +1,7 @@
 version: '2'
 services:   
     potree:
-      restart: always
+      # restart: always
       image: cvast/cvast-potree:dev
       working_dir: /potree
       build: 
