@@ -88,3 +88,4 @@ WORKDIR ${POTREE_ROOT}
 
 # Define default command.
 ENTRYPOINT ["/install/entrypoint.sh"]
+CMD ["runserver"]
