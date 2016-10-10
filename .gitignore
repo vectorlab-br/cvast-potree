@@ -1,2 +1,3 @@
 www/potree/resources/pointclouds/
 pointcloud_input_folder/
+runDocker.sh
