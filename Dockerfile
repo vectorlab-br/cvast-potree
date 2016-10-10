@@ -74,6 +74,10 @@ COPY /install/entrypoint.sh ${INSTALL_DIR}/entrypoint.sh
 RUN chmod -R 700 ${INSTALL_DIR}
 RUN dos2unix ${INSTALL_DIR}/*
 
+# Create point cloud input folder
+RUN mkdir ${POINTCLOUD_INPUT_FOLDER}
+RUN chmod -R 777 ${POINTCLOUD_INPUT_FOLDER}
+
 # Expose both the HTTP (80) and HTTPS (443) ports
 EXPOSE 80 443
 

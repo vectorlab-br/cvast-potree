@@ -11,8 +11,8 @@ services:
       environment:
       - AWS_ACCESS_KEY_ID=<your aws key ID>
       - AWS_SECRET_ACCESS_KEY=<your aws secret key>
+      - SYNC_S3=False
       volumes:
-      - ./www/potree/:/var/www/potree/
       - ./pointcloud_input_folder:/pointcloud_input_folder
       ports:
         - '82:80'
