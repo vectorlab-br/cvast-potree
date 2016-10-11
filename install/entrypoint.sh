@@ -1,7 +1,6 @@
 #!/bin/bash
 
-set -e 
-set -x
+set -e
 
 BUCKET_NAME=test-cvast-potree
 POTREE_WWW=/var/www/potree
