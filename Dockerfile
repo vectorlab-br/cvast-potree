@@ -78,9 +78,6 @@ RUN dos2unix ${INSTALL_DIR}/*
 RUN mkdir ${POINTCLOUD_INPUT_FOLDER}
 RUN chmod -R 777 ${POINTCLOUD_INPUT_FOLDER}
 
-# Expose both the HTTP (80) and HTTPS (443) ports
-EXPOSE 80 443
-
 # Define mountable directories.
 VOLUME ["/var/log/nginx", "/var/www/potree/resources/pointclouds"]
 
