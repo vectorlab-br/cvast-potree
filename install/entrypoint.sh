@@ -102,7 +102,7 @@ do
 
 	case ${key} in
 		convert)
-			echo "Converting file into Potree format"
+			echo "Command provided: convert. This may take a while..."
 			CONVERT_FILE=True
 			# No further option/value expected, this is a single command, so no 'shift'
 		;;
