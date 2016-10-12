@@ -12,7 +12,6 @@ services:
       - AWS_ACCESS_KEY_ID=<your aws key ID>
       - AWS_SECRET_ACCESS_KEY=<your aws secret key>
       - AWS_DEFAULT_REGION=us-east-1
-      - SYNC_S3=False
       volumes:
       - ./pointcloud_input_folder:/pointcloud_input_folder
       ports:

@@ -11,22 +11,31 @@ S3_POINTCLOUD_INPUT_FOLDER=s3://${BUCKET_NAME}/pointcloud_input_folder
 
 HELP_TEXT="
 	Arguments:
+
 	runserver: Runs Potree in Nginx. 
-		Further expected commands: 
-			-i or --access_key_id <AWS access key id>
-			-k or --secret_access_key <AWS secret key>
+		No further expected commands.
+
 	convert: Converts provided file into Potree format. 
-		Further optional commands: 
-		-f or --file <file name>: input pointcloud file
-		-s3 or --s3: File is stored in AWS S3 bucket: ${S3_POINTCLOUD_INPUT_FOLDER}
-		-n or --generate-page <page name>: Generates a ready to use web page with the given name.
-		-o or --overwrite: overwrites existing pointcloud with same output name (-n or --name)
-		--aabb \"<coordinates>\": Bounding cube as \"minX minY minZ maxX maxY maxZ\". If not provided it is automatically computed
+		Further required commands: 
+			-f or --file <file name>: input pointcloud file
+		Further optional commands:
+			-s3 or --s3: File is stored in AWS S3 bucket: ${S3_POINTCLOUD_INPUT_FOLDER}
+			-n or --generate-page <page name>: Generates a ready to use web page with the given name.
+			-o or --overwrite: overwrites existing pointcloud with same output name (-n or --name)
+			--aabb \"<coordinates>\": Bounding cube as \"minX minY minZ maxX maxY maxZ\". If not provided it is automatically computed
+
+	download_pointclouds: Synchronizes pointclouds stored in ${BUCKET_NAME} to local storage
+		No further expected commands.
+
+	upload_pointclouds: Synchronizes pointclouds stored in local storage to ${BUCKET_NAME}
+		No further expected commands.
+
 	-h or --help: Display help text
 
 	Environment variables required:
-	The AWS Access Key ID of your AWS account
-	The AWS Secret Access Key of your AWS account
+		AWS_ACCESS_KEY_ID: The AWS Access Key ID of your AWS account
+		AWS_SECRET_ACCESS_KEY: The AWS Secret Access Key of your AWS account
+		AWS_DEFAULT_REGION: The AWS region in which your S3 bucket resides.
 "
 
 display_help() {
@@ -35,10 +44,6 @@ display_help() {
 
 
 runserver() {
-	if [[ ${SYNC_S3} == True ]]; then
-		echo "Syncing s3 bucket ${BUCKET_NAME} to local pointcloud folder..."
-		aws s3 sync s3://test-cvast-potree /var/www/potree/resources/pointclouds
-	fi
 	echo "Running NginX server..."
 	exec service nginx start
 }
@@ -60,7 +65,15 @@ convert_file() {
 	copy_frontend_files
 	delete_obsolete_files
 	upload_pointcloud
-	exit 0
+}
+
+download_pointclouds() {
+	echo "Syncing s3 bucket ${BUCKET_NAME} to local pointcloud folder..."
+	aws s3 sync s3://${BUCKET_NAME} /var/www/potree/resources/pointclouds
+}
+
+upload_pointcloud() {
+	aws s3 sync ${POINTCLOUD_OUTPUT_FOLDER} s3://${BUCKET_NAME}
 }
 
 copy_input_file_from_s3() {
@@ -78,9 +91,7 @@ delete_obsolete_files() {
 	rm -rf ${POTREE_WWW}/examples/js
 }
 
-upload_pointcloud() {
-	aws s3 sync ${POINTCLOUD_OUTPUT_FOLDER} s3://${BUCKET_NAME}
-}
+
 
  # Script parameters 
 
@@ -109,6 +120,14 @@ do
 			RUN_SERVER=True
 			# No further option/value expected, this is a single command, so no 'shift'
 		;;
+		download_pointclouds)
+			echo "Command provided: download_pointclouds. This may take a while..."
+			DOWNLOAD_POINTCLOUDS=True
+		;;
+		upload_pointclouds)
+			echo "Command provided: upload_pointclouds. This may take a while..."
+			UPLOAD_POINTCLOUDS=True
+		;;		
 		-f|--file)
 			INPUT_FILE="$2"
 			shift; # next argument
@@ -174,4 +193,11 @@ if [[ ${RUN_SERVER} == True ]]; then
 	runserver
 elif [[ ${CONVERT_FILE} == True ]]; then
 	convert_file
+	exit 0
+elif [[ ${DOWNLOAD_POINTCLOUDS} == True ]]; then
+	download_pointclouds
+	exit 0
+elif [[ ${UPLOAD_POINTCLOUDS} == True ]]; then
+	upload_pointcloud
+	exit 0
 fi
