@@ -3,7 +3,7 @@ FROM ubuntu:16.04
 MAINTAINER Vincent Meijer "vmeijer@usf.edu" 
 
 # Environment variables
-ENV INSTALL_DIR=/install
+ENV INSTALL_DIR=/docker
 ENV POTREE_ROOT=/potree
 ENV POTREE_CONVERTER_ROOT=${POTREE_ROOT}/potree_converter
 ENV LASTOOLS_ROOT=${POTREE_ROOT}/lastools
@@ -70,7 +70,7 @@ COPY config/default-ssl /etc/nginx/sites-available/default-ssl
 COPY www /var/www
 
 #Copy entrypoint script (to sync S3 bucket after deployment)
-COPY /install/entrypoint.sh ${INSTALL_DIR}/entrypoint.sh
+COPY /docker/entrypoint.sh ${INSTALL_DIR}/entrypoint.sh
 RUN chmod -R 700 ${INSTALL_DIR}
 RUN dos2unix ${INSTALL_DIR}/*
 
@@ -84,5 +84,5 @@ VOLUME ["/var/log/nginx", "/var/www/potree/resources/pointclouds"]
 WORKDIR ${POTREE_ROOT}
 
 # Define default command.
-ENTRYPOINT ["/install/entrypoint.sh"]
+ENTRYPOINT ["/docker/entrypoint.sh"]
 CMD ["runserver"]
