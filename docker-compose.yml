@@ -1,7 +1,7 @@
 version: '2'
 services:   
     potree:
-      image: cvast/cvast-potree:dev
+      image: cvast/cvast-potree:1.0b
       working_dir: /potree
       build: 
         context: .
@@ -12,55 +12,12 @@ services:
       - AWS_SECRET_ACCESS_KEY=<your aws secret key>
       - AWS_DEFAULT_REGION=us-east-1
       volumes:
-      - potree-pointclouds:/var/www/potree/resources/pointclouds/      
+      - potree-pointclouds:/var/www/potree/resources/pointclouds   
       - potree-pointclouds-input:/pointcloud_input_folder
       ports:
-        - '82:80'
-
-
-    nginx:
-      container_name: nginx
-      restart: unless-stopped
-      image: cvast/cvast-nginx:1.1
-      ports:
         - '80:80'
-        - '443:443'
-      volumes:
-        - web-static:/www/static
-        - nginx-root:/var/www
-        - nginx-log:/var/log/nginx
-        - letsencrypt-config:/etc/letsencrypt
-      depends_on:
-        - potree
-      environment:
-        - PROXY_CONTAINER=potree
-        - PROXY_PORT=82
-        - DOMAIN_NAMES=build.usfcvast.org www.build.usfcvast.org
-        - PUBLIC_MODE=False
-        - TZ=EST
 
 
-    letsencrypt:
-      container_name: letsencrypt
-      image: cvast/cvast-letsencrypt:1.1
-      volumes:
-        - nginx-root:/var/www
-        - letsencrypt-config:/etc/letsencrypt
-        - letsencrypt-log:/var/log/letsencrypt
-      command: get_certificate
-      environment:
-        - FORCE_NON_ELB=True
-        - LETSENCRYPT_EMAIL=vmeijer@usf.edu
-        - DOMAIN_NAMES=build.usfcvast.org www.build.usfcvast.org
-        - PRODUCTION_MODE=True
-        - PERSISTENT_MODE=True
-        - TZ=EST
-        
 volumes:
     potree-pointclouds:
     potree-pointclouds-input:
-    web-static:
-    nginx-root:
-    nginx-log:
-    letsencrypt-config:
-    letsencrypt-log:

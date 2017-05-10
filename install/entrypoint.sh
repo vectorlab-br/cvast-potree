@@ -2,7 +2,6 @@
 
 set -e
 
-BUCKET_NAME=test-cvast-potree
 POTREE_WWW=/var/www/potree
 POINTCLOUD_OUTPUT_FOLDER=${POTREE_WWW}/resources/pointclouds
 POINTCLOUD_INPUT_FOLDER=${POINTCLOUD_INPUT_FOLDER}
@@ -10,29 +9,39 @@ IS_S3_FILE=False
 S3_POINTCLOUD_INPUT_FOLDER=s3://${BUCKET_NAME}/pointcloud_input_folder
 
 HELP_TEXT="
-	Arguments:
+	Commands:
 
 	runserver: Runs Potree in Nginx. 
-		No further expected commands.
 
 	convert: Converts provided file into Potree format. 
-		Further required commands: 
-			-f or --file <file name>: input pointcloud file
+		Further required arguments: 
+			-f or --file <file name>
+				Input pointcloud file
 		Further optional commands:
-			-s3 or --s3: File is stored in AWS S3 bucket: ${S3_POINTCLOUD_INPUT_FOLDER}
-			-n or --generate-page <page name>: Generates a ready to use web page with the given name.
-			-o or --overwrite: overwrites existing pointcloud with same output name (-n or --name)
-			--aabb \"<coordinates>\": Bounding cube as \"minX minY minZ maxX maxY maxZ\". If not provided it is automatically computed
+			-s3 or --s3 <bucket_name>
+				File to convert is stored in specified AWS S3 bucket.
+			-n or --generate-page <page name>
+				Generates a ready to use web page with the given name.
+			-o or --overwrite
+				Overwrites existing pointcloud with same output name (-n or --name).
+			--aabb \"<coordinates>\"
+				Bounding cube as \"minX minY minZ maxX maxY maxZ\". If not provided it is automatically computed
 
-	download_pointclouds: Synchronizes pointclouds stored in ${BUCKET_NAME} to local storage
-		No further expected commands.
+	download_pointclouds: Synchronizes pointclouds stored in an AWS S3 bucket to local storage. 
+		Local folder: /var/www/potree/resources/pointclouds
+		Further required arguments:
+			-s3 or --s3 <bucket_name>
+				S3 bucket your files should be downloaded from.
 
-	upload_pointclouds: Synchronizes pointclouds stored in local storage to ${BUCKET_NAME}
-		No further expected commands.
+	upload_pointclouds: Synchronizes pointclouds stored in local storage to an AWS S3 bucket.
+		Local folder: /var/www/potree/resources/pointclouds
+		Further required arguments:
+			-s3 or --s3 <bucket_name>
+				S3 bucket your files should be downloaded from.		
 
-	-h or --help: Display help text
+	-h or --help or help: Display help text
 
-	Environment variables required:
+	Environment variables required when using AWS-related commands:
 		AWS_ACCESS_KEY_ID: The AWS Access Key ID of your AWS account
 		AWS_SECRET_ACCESS_KEY: The AWS Secret Access Key of your AWS account
 		AWS_DEFAULT_REGION: The AWS region in which your S3 bucket resides.
@@ -50,7 +59,7 @@ runserver() {
 
 convert_file() {
 	# Copy file from S3 bucket
-	if [[ ${IS_S3_FILE} == True ]]; then
+	if [[ ! -z ${BUCKET_NAME} ]]; then
 		copy_input_file_from_s3
 	fi
 	
@@ -64,7 +73,14 @@ convert_file() {
 	# Post-processing / cleanup / upload pointcloud
 	copy_frontend_files
 	delete_obsolete_files
-	upload_pointcloud
+
+	if [[ ! -z ${BUCKET_NAME} ]]; then
+		upload_pointcloud
+	fi
+
+	echo "Finished converting ${INPUT_FILE}."
+	echo "Data: /var/www/potree/resources/pointclouds/${OUTPUT_NAME}"
+	echo "Web page: <hostname>/potree/pages/${OUTPUT_NAME}.html"
 }
 
 download_pointclouds() {
@@ -91,6 +107,32 @@ delete_obsolete_files() {
 	rm -rf ${POTREE_WWW}/examples/js
 }
 
+check_aws_env_variables() {
+	if [[ -z ${AWS_ACCESS_KEY_ID} ]]; then
+		echo "Environment variable AWS_ACCESS_KEY_ID not specified, exiting..."
+		display_help
+		exit 1
+	fi
+
+	if [[ -z ${AWS_SECRET_ACCESS_KEY} ]]; then
+		echo "Environment variable AWS_SECRET_ACCESS_KEY not specified, exiting..."
+		display_help
+		exit 1
+	fi
+
+	if [[ -z ${AWS_DEFAULT_REGION} ]]; then
+		echo "Environment variable AWS_DEFAULT_REGION not specified, exiting..."
+		display_help
+		exit 1
+	fi
+
+	if [[ -z ${BUCKET_NAME} ]]; then
+		echo "Argument BUCKET_NAME not specified, exiting..."
+		display_help
+		exit 1
+	fi
+	
+}
 
 
  # Script parameters 
@@ -133,7 +175,8 @@ do
 			shift; # next argument
 		;;
 		-s3|--s3)
-			IS_S3_FILE=True
+			BUCKET_NAME="$2"
+			shift; # next argument
 		;;
 		-p|--generate-page)
 			OUTPUT_NAME="$2"
@@ -158,7 +201,7 @@ do
 			fi
 			exit 0
 		;;	
-		-h|--help)
+		-h|--help|help)
 			display_help
 			exit 0
 		;;
@@ -170,23 +213,6 @@ do
 	esac
 	shift # next argument or value
 done
-
-
-# Global variables (parsed through Docker run command)
-if [[ -z ${AWS_ACCESS_KEY_ID} ]]; then
-	echo "Environment variable AWS_ACCESS_KEY_ID not specified, exiting..."
-	exit 1
-fi
-
-if [[ -z ${AWS_SECRET_ACCESS_KEY} ]]; then
-	echo "Environment variable AWS_SECRET_ACCESS_KEY not specified, exiting..."
-	exit 1
-fi
-
-if [[ -z ${AWS_DEFAULT_REGION} ]]; then
-	echo "Environment variable AWS_DEFAULT_REGION not specified, exiting..."
-	exit 1
-fi
 	
 	
 if [[ ${RUN_SERVER} == True ]]; then
@@ -195,9 +221,11 @@ elif [[ ${CONVERT_FILE} == True ]]; then
 	convert_file
 	exit 0
 elif [[ ${DOWNLOAD_POINTCLOUDS} == True ]]; then
+	check_aws_env_variables
 	download_pointclouds
 	exit 0
 elif [[ ${UPLOAD_POINTCLOUDS} == True ]]; then
+	check_aws_env_variables
 	upload_pointcloud
 	exit 0
 fi

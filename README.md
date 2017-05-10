@@ -2,31 +2,49 @@ Potree for Docker
 =================
 Usage:
 ```
-Arguments:
-    runserver: Runs Potree in Nginx. 
-        No further expected commands.
-    convert: Converts provided file into Potree format. 
-        Further required commands: 
-            -f or --file <file name>: input pointcloud file
-        Further optional commands:
-            -s3 or --s3: File is stored in AWS S3 bucket: ${S3_POINTCLOUD_INPUT_FOLDER}
-            -n or --generate-page <page name>: Generates a ready to use web page with the given name.
-            -o or --overwrite: overwrites existing pointcloud with same output name (-n or --name)
-            --aabb \"<coordinates>\": Bounding cube as \"minX minY minZ maxX maxY maxZ\". 
-            If not provided it is automatically computed
-    download_pointclouds: Synchronizes pointclouds stored in ${BUCKET_NAME} to local storage
-        No further expected commands.
-    upload_pointclouds: Synchronizes pointclouds stored in local storage to ${BUCKET_NAME}
-        No further expected commands.
-    -h or --help: Display help text
-    Environment variables required:
-        AWS_ACCESS_KEY_ID: The AWS Access Key ID of your AWS account
-        AWS_SECRET_ACCESS_KEY: The AWS Secret Access Key of your AWS account
-        AWS_DEFAULT_REGION: The AWS region in which your S3 bucket resides.
-```
+	Commands:
 
-docker-nginx
-============
+	runserver: Runs Potree in Nginx. 
+
+	convert: Converts provided file into Potree format. 
+		Further required arguments: 
+			-f or --file <file name>
+				Input pointcloud file
+		Further optional commands:
+			-s3 or --s3 <bucket_name>
+				File to convert is stored in specified AWS S3 bucket.
+			-n or --generate-page <page name>
+				Generates a ready to use web page with the given name.
+			-o or --overwrite
+				Overwrites existing pointcloud with same output name (-n or --name).
+			--aabb \"<coordinates>\"
+				Bounding cube as \"minX minY minZ maxX maxY maxZ\". If not provided it is automatically computed
+
+	download_pointclouds: Synchronizes pointclouds stored in an AWS S3 bucket to local storage. 
+		Local folder: /var/www/potree/resources/pointclouds
+		Further required arguments:
+			-s3 or --s3 <bucket_name>
+				S3 bucket your files should be downloaded from.
+
+	upload_pointclouds: Synchronizes pointclouds stored in local storage to an AWS S3 bucket.
+		Local folder: /var/www/potree/resources/pointclouds
+		Further required arguments:
+			-s3 or --s3 <bucket_name>
+				S3 bucket your files should be downloaded from.		
+
+	-h or --help: Display help text
+
+	Environment variables required when using AWS-related commands:
+		AWS_ACCESS_KEY_ID: The AWS Access Key ID of your AWS account
+		AWS_SECRET_ACCESS_KEY: The AWS Secret Access Key of your AWS account
+		AWS_DEFAULT_REGION: The AWS region in which your S3 bucket resides.
+```  
+  
+  
+Original Nginx readme for background info:
+==========================================
+## docker-nginx
+
 
 A high-performance Nginx base image for Docker to serve static websites. It will serve anything in the `/var/www` directory.
 
