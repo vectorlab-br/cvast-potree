@@ -1,6 +1,7 @@
-FROM ubuntu:16.04
+FROM ubuntu:24.10
+# FROM ubuntu:16.04
 
-MAINTAINER Vincent Meijer "vmeijer@usf.edu" 
+# MAINTAINER Vincent Meijer "vmeijer@usf.edu" 
 
 # Environment variables
 ENV INSTALL_DIR=/docker
@@ -24,10 +25,12 @@ RUN apt-get update -y &&\
 	apt-get update -y &&\
 	apt-get install -y nginx &&\
 	chown -R www-data:www-data /var/lib/nginx &&\
-	apt-get install -y python2.7 &&\
+	# apt-get install -y python2.7 &&\
+	apt-get install -y python3.10 &&\
 	apt-get install -y curl &&\
 	curl -O https://bootstrap.pypa.io/get-pip.py &&\
-	python2.7 get-pip.py &&\
+	# python2.7 get-pip.py &&\
+	python3.10 get-pip.py &&\
 	pip install awscli &&\
 	apt-get install -y dos2unix &&\
 	apt-get install -y git &&\
