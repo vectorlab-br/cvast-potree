@@ -1,4 +1,4 @@
-FROM ubuntu:24.10
+FROM ubuntu/nginx
 # FROM ubuntu:16.04
 
 # MAINTAINER Vincent Meijer "vmeijer@usf.edu" 
@@ -18,47 +18,53 @@ WORKDIR ${INSTALL_DIR}
 
 # Install dependencies
 # Install software-properties-common to fix error for add-apt-repository: command not found
-RUN apt-get update -y &&\
-	apt-get install -y software-properties-common &&\
-	add-apt-repository -y ppa:nginx/stable &&\
-	add-apt-repository ppa:george-edison55/cmake-3.x &&\	
-	apt-get update -y &&\
-	apt-get install -y nginx &&\
-	chown -R www-data:www-data /var/lib/nginx &&\
-	# apt-get install -y python2.7 &&\
-	apt-get install -y python3.10 &&\
-	apt-get install -y curl &&\
-	curl -O https://bootstrap.pypa.io/get-pip.py &&\
-	# python2.7 get-pip.py &&\
-	python3.10 get-pip.py &&\
-	pip install awscli &&\
-	apt-get install -y dos2unix &&\
-	apt-get install -y git &&\
-	apt-get update -y &&\
-	apt-get install -y g++ &&\
-	apt-get install -y cmake &&\
-	apt-get install -y build-essential &&\
-	apt-get install -y libboost-all-dev &&\
-	rm -rf /var/lib/apt/lists/*
+# RUN apt-get update -y &&\
+	# apt-get install -y software-properties-common &&\
+	# add-apt-repository -y ppa:nginx/stable &&\
+	# add-apt-repository ppa:george-edison55/cmake-3.x &&\
+	# apt-get update -y &&\
+	# apt-get install -y nginx &&\
+	# chown -R www-data:www-data /var/lib/nginx &&\
+	### apt-get install -y python2.7 &&\
+	# apt-get install -y python3.12 &&\
+	# apt-get install -y curl &&\
+	# curl -O https://bootstrap.pypa.io/get-pip.py &&\
+	### python2.7 get-pip.py &&\
+	# python3.10 get-pip.py &&\
+	# pip install awscli &&\
+	# apt-get install -y dos2unix &&\
+	# apt-get install -y git &&\
+	# apt-get update -y &&\
+	# apt-get install -y g++ &&\
+	# apt-get install -y cmake &&\
+	# apt-get install -y build-essential &&\
+	# apt-get install -y libboost-all-dev &&\
+	# rm -rf /var/lib/apt/lists/*
+
+	RUN apt update -y &&\
+	apt upgrade -y &&\
+	apt install python3 -y &&\
+	apt install python3-pip -y &&\
+	apt install dos2unix -y
 
 
-WORKDIR ${LASTOOLS_ROOT}	
-RUN git clone https://github.com/m-schuetz/LAStools.git master &&\
-	cd master/LASzip &&\
-	mkdir build &&\
-	cd build &&\
-	cmake -DCMAKE_BUILD_TYPE=Release .. &&\
-	make VERBOSE=1
+# WORKDIR ${LASTOOLS_ROOT}	
+# RUN git clone https://github.com/m-schuetz/LAStools.git master &&\
+# 	cd master/LASzip &&\
+# 	mkdir build &&\
+# 	cd build &&\
+# 	cmake -DCMAKE_BUILD_TYPE=Release .. &&\
+# 	make VERBOSE=1
 
-COPY potree_converter ${POTREE_CONVERTER_ROOT}
+# COPY potree_converter ${POTREE_CONVERTER_ROOT}
 
-WORKDIR ${POTREE_CONVERTER_ROOT}
-RUN mkdir build &&\
-	cd build &&\
-	cmake -DCMAKE_BUILD_TYPE=Release -DLASZIP_INCLUDE_DIRS=${LASTOOLS_ROOT}/master/LASzip/dll -DLASZIP_LIBRARY=${LASTOOLS_ROOT}/master/LASzip/build/src/liblaszip.so .. &&\
-	make &&\
-	cp -R ${POTREE_CONVERTER_ROOT}/PotreeConverter/resources/ ${POTREE_ROOT}/resources &&\
-	cp ${POTREE_CONVERTER_ROOT}/build/PotreeConverter/PotreeConverter /usr/bin
+# WORKDIR ${POTREE_CONVERTER_ROOT}
+# RUN mkdir build &&\
+# 	cd build &&\
+# 	cmake -DCMAKE_BUILD_TYPE=Release -DLASZIP_INCLUDE_DIRS=${LASTOOLS_ROOT}/master/LASzip/dll -DLASZIP_LIBRARY=${LASTOOLS_ROOT}/master/LASzip/build/src/liblaszip.so .. &&\
+# 	make &&\
+# 	cp -R ${POTREE_CONVERTER_ROOT}/PotreeConverter/resources/ ${POTREE_ROOT}/resources &&\
+# 	cp ${POTREE_CONVERTER_ROOT}/build/PotreeConverter/PotreeConverter /usr/bin
 
  	
 # Config
